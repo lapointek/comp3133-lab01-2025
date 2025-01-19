@@ -26,7 +26,7 @@ if (canTxtExists) {
     });
 }
 
-// Check if United States.txt if so and delete file
+// Check if United States.txt exists if so delete file
 if (usaTxtExists) {
     fs.unlink("United States.txt", (err) => {
         if (err) {
