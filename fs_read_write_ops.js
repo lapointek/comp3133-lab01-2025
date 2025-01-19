@@ -6,35 +6,39 @@ const inputFile = "input_countries.csv";
 let canTxt = "Canada";
 let usaTxt = "United States";
 let canOutput = "Canada.txt";
+let usaOutput = "United States.txt";
 let inputFileExists = fs.existsSync("input_countries.csv");
-let canTxtExists = fs.existsSync("canada.txt");
-let usaTxtExists = fs.existsSync("usa.txt");
+let canTxtExists = fs.existsSync("Canada.txt");
+let usaTxtExists = fs.existsSync("United States.txt");
 
 if (!inputFileExists) {
     console.log(`${inputFile} does not exist`);
 }
 
+// Check if Canada.txt exists if so delete file
 if (canTxtExists) {
-    fs.unlink("canada.txt", (err) => {
+    fs.unlink("Canada.txt", (err) => {
         if (err) {
             console.log(`Error: ${err}`);
         } else {
-            console.log("canada.txt file successfully deleted");
+            console.log("Canada.txt file successfully deleted");
         }
     });
 }
 
+// Check if United States.txt if so and delete file
 if (usaTxtExists) {
-    fs.unlink("usa.txt", (err) => {
+    fs.unlink("United States.txt", (err) => {
         if (err) {
             console.log(`Error: ${err}`);
         } else {
-            console.log("usa.txt file successfully deleted");
+            console.log("United States.txt file successfully deleted");
         }
     });
 }
 
-let filteredData = [];
+// Create Canada.txt
+let canFilteredData = [];
 fs.createReadStream(inputFile)
     // piping data from input_countries.csv to CSV parser.
     .pipe(csv())
@@ -42,22 +46,53 @@ fs.createReadStream(inputFile)
     .on("data", (row) => {
         // retrieves all values of current row as array
         const rowValues = Object.values(row);
-        // check if value in current row contain the search term
+        // check if value in the current row contains the search term
         if (rowValues.some((value) => value.includes(canTxt))) {
-            filteredData.push(row);
+            canFilteredData.push(row);
         }
     })
-    // log when csv file is finished processing
+    // Process at the end of the file
     .on("end", () => {
         // Create CSV header by retrieving keys from the first object in input_countries.txt
         // The keys are joined into string separated by commas and a newline character is appended.
-        const csvHeader = Object.keys(filteredData[0]).join(",") + "\n";
+        const csvHeader = Object.keys(canFilteredData[0]).join(",") + "\n";
         // Maps each row object to a string joined by
         // commas and combines all rows into a single string and separated by a newline
-        const csvRows = filteredData
+        const csvRows = canFilteredData
             .map((row) => Object.values(row).join(","))
             .join("\n");
         // Write CSV content including the header and filtered rows to Canada.txt
         fs.writeFileSync(canOutput, csvHeader + csvRows);
+        // log when CSV file is finished
+        console.log("CSV file successfully proccessed");
+    });
+
+// Create United States.txt
+let usaFilteredData = [];
+fs.createReadStream(inputFile)
+    // piping data from input_countries.csv to CSV parser.
+    .pipe(csv())
+    // log each row
+    .on("data", (row) => {
+        // retrieves all values of current row as array
+        const rowValues = Object.values(row);
+        // check if value in the current row contains the search term
+        if (rowValues.some((value) => value.includes(usaTxt))) {
+            usaFilteredData.push(row);
+        }
+    })
+    // Process at the end of the file
+    .on("end", () => {
+        // Create CSV header by retrieving keys from the first object in input_countries.txt
+        // The keys are joined into string separated by commas and a newline character is appended.
+        const csvHeader = Object.keys(usaFilteredData[0]).join(",") + "\n";
+        // Maps each row object to a string joined by
+        // commas and combines all rows into a single string and separated by a newline
+        const csvRows = usaFilteredData
+            .map((row) => Object.values(row).join(","))
+            .join("\n");
+        // Write CSV content including the header and filtered rows to Canada.txt
+        fs.writeFileSync(usaOutput, csvHeader + csvRows);
+        // log when CSV file is finished
         console.log("CSV file successfully proccessed");
     });
